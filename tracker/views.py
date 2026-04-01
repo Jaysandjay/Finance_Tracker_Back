@@ -34,38 +34,38 @@ class TransactionViewSet(viewsets.ModelViewSet):
             qs = qs.filter(amount__lte=max_amount)
         
         return qs
-    
 
-    class BudgetViewSet(viewsets.ModelViewSet):
-        serializer_class = BudgetSerializer
-        qs = Budget.objects.all()
- 
 
-    class MonthlySummaryView(views.APIView):
-        def get(self, request):
-            month = request.query_params.get('month')
-            if month:
-                year, m = month.split('-')
-            else:
-                today = date.today()
-                year, m = today.year, today.month
+class BudgetViewSet(viewsets.ModelViewSet):
+    serializer_class = BudgetSerializer
+    qs = Budget.objects.all()
 
-            transactions = Transaction.objects.filter(date__year=year, date__month=m)
-            total_income = transactions.filter(type='income').aggregate(Sum('amount'))['amount__sum'] or 0
-            total_expenses = transactions.filter(type='expense').aaggregate(Sum('amount'))['amount__sum'] or 0
 
-            by_category = (
-                transactions.filter(type='expense')
-                .values('category__name')
-                .annotate(total=Sum('amount'))
-                .order_by('-total')
-            )
+class MonthlySummaryView(views.APIView):
+    def get(self, request):
+        month = request.query_params.get('month')
+        if month:
+            year, m = month.split('-')
+        else:
+            today = date.today()
+            year, m = today.year, today.month
 
-            return Response({
-                'month': f"{year}-{m}",
-                'total_income': total_income,
-                'total_expenses': total_expenses,
-                'net': total_income - total_expenses,
-                'by_category': list(by_category)
-            })
-            
+        transactions = Transaction.objects.filter(date__year=year, date__month=m)
+        total_income = transactions.filter(type='income').aggregate(Sum('amount'))['amount__sum'] or 0
+        total_expenses = transactions.filter(type='expense').aaggregate(Sum('amount'))['amount__sum'] or 0
+
+        by_category = (
+            transactions.filter(type='expense')
+            .values('category__name')
+            .annotate(total=Sum('amount'))
+            .order_by('-total')
+        )
+
+        return Response({
+            'month': f"{year}-{m}",
+            'total_income': total_income,
+            'total_expenses': total_expenses,
+            'net': total_income - total_expenses,
+            'by_category': list(by_category)
+        })
+        
