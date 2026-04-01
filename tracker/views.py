@@ -53,7 +53,7 @@ class MonthlySummaryView(views.APIView):
 
         transactions = Transaction.objects.filter(date__year=year, date__month=m)
         total_income = transactions.filter(type='income').aggregate(Sum('amount'))['amount__sum'] or 0
-        total_expenses = transactions.filter(type='expense').aaggregate(Sum('amount'))['amount__sum'] or 0
+        total_expenses = transactions.filter(type='expense').aggregate(Sum('amount'))['amount__sum'] or 0
 
         by_category = (
             transactions.filter(type='expense')
