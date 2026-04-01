@@ -5,7 +5,7 @@ from .views import *
 router = DefaultRouter()
 router.register('categories', CategoryViewSet)
 router.register('transactions', TransactionViewSet, basename='transaction')
-router.register('budgets', BudgetViewSet)
+router.register('budgets', BudgetViewSet, basename='budget')
 
 urlpatterns = [
     path('', include(router.urls)),
